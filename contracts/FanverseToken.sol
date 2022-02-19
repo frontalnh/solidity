@@ -202,14 +202,6 @@ contract Pausable is AdminRole {
         _paused = true;
         emit Paused(msg.sender);
     }
-
-    /**
-     * @dev called by the owner to unpause, returns to normal state
-     */
-    function unpause() public onlyAdmin whenPaused {
-        _paused = false;
-        emit Unpaused(msg.sender);
-    }
 }
 
 interface IERC20 {
@@ -468,7 +460,7 @@ contract ERC20Detailed is IERC20 {
     }
 }
 
-contract SQAURE is ERC20Detailed, ERC20Pausable, ERC20Burnable {
+contract FanverseToken is ERC20Detailed, ERC20Pausable, ERC20Burnable {
     
     struct LockInfo {
         uint256 _releaseTime;
@@ -490,7 +482,7 @@ contract SQAURE is ERC20Detailed, ERC20Pausable, ERC20Burnable {
         _;
     }
     
-    constructor() ERC20Detailed("Namhoon", "NH", 18) public  {
+    constructor() ERC20Detailed("Fanverse Token", "FT", 18) public  {
         
         _mint(msg.sender, 1000000000 * (10 ** 18));
     }
@@ -553,16 +545,7 @@ contract SQAURE is ERC20Detailed, ERC20Pausable, ERC20Burnable {
         _unlock(holder,idx);
         return true;
     }
-    
-    /**
-     * @dev Upgrades the implementation address
-     * @param _newImplementation address of the new implementation
-     */
-    function upgradeTo(address _newImplementation) public onlyOwner {
-        require(implementation != _newImplementation);
-        _setImplementation(_newImplementation);
-    }
-    
+
     function _lock(address holder, uint256 value, uint256 releaseTime) internal returns(bool) {
         _balances[holder] = _balances[holder].sub(value);
         timelockList[holder].push( LockInfo(releaseTime, value) );
@@ -595,73 +578,5 @@ contract SQAURE is ERC20Detailed, ERC20Pausable, ERC20Burnable {
             }
         }
         return true;
-    }
-    
-    /**
-     * @dev Sets the address of the current implementation
-     * @param _newImp address of the new implementation
-     */
-    function _setImplementation(address _newImp) internal {
-        implementation = _newImp;
-    }
-    
-    /**
-     * @dev Fallback function allowing to perform a delegatecall 
-     * to the given implementation. This function will return 
-     * whatever the implementation call returns
-     */
-    function () payable external {
-        address impl = implementation;
-        require(impl != address(0));
-        assembly {
-            /*
-                0x40 is the "free memory slot", meaning a pointer to next slot of empty memory. mload(0x40)
-                loads the data in the free memory slot, so `ptr` is a pointer to the next slot of empty
-                memory. It's needed because we're going to write the return data of delegatecall to the
-                free memory slot.
-            */
-            let ptr := mload(0x40)
-            /*
-                `calldatacopy` is copy calldatasize bytes from calldata
-                First argument is the destination to which data is copied(ptr)
-                Second argument specifies the start position of the copied data.
-                    Since calldata is sort of its own unique location in memory,
-                    0 doesn't refer to 0 in memory or 0 in storage - it just refers to the zeroth byte of calldata.
-                    That's always going to be the zeroth byte of the function selector.
-                Third argument, calldatasize, specifies how much data will be copied.
-                    calldata is naturally calldatasize bytes long (same thing as msg.data.length)
-            */
-            calldatacopy(ptr, 0, calldatasize)
-            /*
-                delegatecall params explained:
-                gas: the amount of gas to provide for the call. `gas` is an Opcode that gives
-                    us the amount of gas still available to execution
-                _impl: address of the contract to delegate to
-                ptr: to pass copied data
-                calldatasize: loads the size of `bytes memory data`, same as msg.data.length
-                0, 0: These are for the `out` and `outsize` params. Because the output could be dynamic,
-                        these are set to 0, 0 so the output data will not be written to memory. The output
-                        data will be read using `returndatasize` and `returdatacopy` instead.
-                result: This will be 0 if the call fails and 1 if it succeeds
-            */
-            let result := delegatecall(gas, impl, ptr, calldatasize, 0, 0)
-            let size := returndatasize
-            /*
-                `returndatacopy` is an Opcode that copies the last return data to a slot. `ptr` is the
-                    slot it will copy to, 0 means copy from the beginning of the return data, and size is
-                    the amount of data to copy.
-                `returndatasize` is an Opcode that gives us the size of the last return data. In this case, that is the size of the data returned from delegatecall
-            */
-            returndatacopy(ptr, 0, size)
-            
-            /*
-                if `result` is 0, revert.
-                if `result` is 1, return `size` amount of data from `ptr`. This is the data that was
-                copied to `ptr` from the delegatecall return data
-            */
-            switch result
-            case 0 { revert(ptr, size) }
-            default { return(ptr, size) }
-        }
     }
 }
