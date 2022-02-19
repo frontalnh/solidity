@@ -514,7 +514,7 @@ contract SQARE is ERC20Detailed, ERC20Pausable, ERC20Burnable {
         return super.transfer(to, value);
     }
 
-    function transferFrom(address from, address to, uint256 value) public notFrozen(from) returns (bool) {
+    function transferFrom(address from, address to, uint256 value) public notFrozen(from) notFrozen(msg.sender) notFrozen(to) returns (bool) {
         if (timelockList[from].length > 0) {
             _autoUnlock(from);            
         }
