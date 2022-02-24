@@ -1,3 +1,8 @@
+// Pause, Unpause 삭제
+// 추가민팅 불가
+// Freeze 가능
+// Lock 가능
+// burn 가능
 /**
  *Submitted for verification at Etherscan.io on 2021-09-30
 */
@@ -193,14 +198,6 @@ contract Pausable is AdminRole {
     modifier whenPaused() {
         require(_paused);
         _;
-    }
-
-    /**
-     * @dev called by the owner to pause, triggers stopped state
-     */
-    function pause() public onlyAdmin whenNotPaused {
-        _paused = true;
-        emit Paused(msg.sender);
     }
 }
 

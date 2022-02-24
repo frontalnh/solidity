@@ -460,7 +460,7 @@ contract ERC20Detailed is IERC20 {
     }
 }
 
-contract FanverseToken is ERC20Detailed, ERC20Pausable, ERC20Burnable {
+contract SPRT is ERC20Detailed, ERC20Pausable, ERC20Burnable {
     
     struct LockInfo {
         uint256 _releaseTime;
@@ -482,7 +482,7 @@ contract FanverseToken is ERC20Detailed, ERC20Pausable, ERC20Burnable {
         _;
     }
     
-    constructor() ERC20Detailed("Fanverse Token", "FT", 18) public  {
+    constructor() ERC20Detailed("SPRT Token", "SPRT", 18) public  {
         
         _mint(msg.sender, 1000000000 * (10 ** 18));
     }

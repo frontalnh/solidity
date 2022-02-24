@@ -1,3 +1,9 @@
+// Pause 가능
+// Unpause 가능
+// 추가민팅 불가
+// Freeze 가능
+// Lock 가능
+// burn 가능
 /**
  *Submitted for verification at Etherscan.io on 2021-09-30
 */
